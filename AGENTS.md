@@ -34,6 +34,7 @@ npm run test:e2e     # Playwright chromium suite with auto-started dev server
 
 ## Environment & Deployment Notes
 - Node 24+ is supported; ensure `npm install` completes without `--ignore-scripts` to build native deps (`better-sqlite3`).
-- Local dev defaults to SQLite under `data/delivery.sqlite`; set `DATABASE_URL` for Postgres deployments and `SQLITE_PATH` for Railway volumes.
-- The production instance currently runs on Railway (`mailtimes.up.railway.app`, port 8080). Use `npm run build && npm run start -- --hostname 0.0.0.0 --port 8080` locally to mirror the platform.
+- Production runs on Railway with a managed Postgres service (`Mail-Postgres`). Set the web service’s `DATABASE_URL` to the private hostname (`postgres.railway.internal:5432`) for best performance.
+- Local development defaults to SQLite under `data/delivery.sqlite`; copy `.env.example` to `.env.local` if you need to point at Postgres or override analytics IDs.
+- The live site is `https://mailtimes.up.railway.app` (port 8080). Use `npm run build && npm run start -- --hostname 0.0.0.0 --port 8080` locally to mirror the platform.
 - Keep optional analytics/ad IDs (`NEXT_PUBLIC_GA_MEASUREMENT_ID`, `NEXT_PUBLIC_GOOGLE_ADSENSE_CLIENT`) in `.env.local`, never in source control.

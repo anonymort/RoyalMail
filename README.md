@@ -1,6 +1,6 @@
 # Royal Mail Delivery Times Tracker
 
-Minimal Next.js 15 app that crowdsources Royal Mail delivery times per postcode sector. Built for simple deployment on Railway using a single SQLite table (with optional Postgres fallback).
+Minimal Next.js 15 app that crowdsources Royal Mail delivery times per postcode sector. Designed for Railway deployment with managed Postgres (SQLite remains available for local development).
 
 ## Stack
 - Next.js 15 (App Router + TypeScript)
@@ -14,22 +14,27 @@ Minimal Next.js 15 app that crowdsources Royal Mail delivery times per postcode 
    npm install
    ```
    (Peer deps are relaxed via `.npmrc` so React 19 RC works with Recharts.)
-2. Run the strict lint/typecheck suite:
+2. (Optional) Copy environment defaults and adjust if needed:
+   ```bash
+   cp .env.example .env.local
+   ```
+   Leave `DATABASE_URL` blank for local SQLite; populate it to test against Postgres.
+3. Run the strict lint/typecheck suite:
    ```bash
    npm run lint && npm run typecheck
    ```
    (Next.js also runs these during `npm run build`.)
-3. Run the dev server (creates `data/delivery.sqlite` automatically):
+4. Run the dev server (creates `data/delivery.sqlite` automatically when `DATABASE_URL` is unset):
    ```bash
    npm run dev
    ```
-4. Visit `http://localhost:3000`.
+5. Visit `http://localhost:3000`.
 
 ## Environment variables
 | Variable | Purpose |
 | --- | --- |
-| `DATABASE_URL` | Optional. Set to a Postgres connection string to switch from SQLite. Leave unset for local SQLite (`data/delivery.sqlite`). |
-| `SQLITE_PATH` | Optional override for the SQLite file location. |
+| `DATABASE_URL` | Postgres connection string (`postgresql://…`). Required in production; leave unset locally to use SQLite (`data/delivery.sqlite`). |
+| `SQLITE_PATH` | Optional override for the SQLite file location. Leave unset to use Postgres when `DATABASE_URL` is present. |
 | `NEXT_PUBLIC_GA_MEASUREMENT_ID` | Optional. Google Analytics v4 ID; when provided the tracking snippet is injected. |
 | `NEXT_PUBLIC_GOOGLE_ADSENSE_CLIENT` | Optional. Adds a 300×250 AdSense slot bottom-right on large screens. |
 
@@ -39,13 +44,12 @@ Minimal Next.js 15 app that crowdsources Royal Mail delivery times per postcode 
 
 ## Railway deployment
 1. Create a Railway project and provision a web service from this repo.
-2. Add a persistent volume (1GB is plenty) and mount it to `/app/data`.
-3. Set `SQLITE_PATH=/app/data/delivery.sqlite` as an environment variable.
+2. Provision the managed Postgres service (e.g., `Mail-Postgres`) and copy its `DATABASE_URL`.
+3. In the web service, add the `DATABASE_URL` variable (use the internal hostname `postgres.railway.internal:5432` for best performance). Keep `.env.local` for local overrides.
 4. (Optional) Add `NEXT_PUBLIC_GA_MEASUREMENT_ID` and/or `NEXT_PUBLIC_GOOGLE_ADSENSE_CLIENT`.
-5. Deploy. The app will create the table automatically on first start.
+5. Redeploy. On first boot the app will create the `delivery_reports` table automatically.
 
-### Postgres fallback
-If Railway volumes are unavailable, attach a Postgres add-on and set its connection string as `DATABASE_URL`. The single table is created automatically with identical columns.
+> Tip: For local development you can stay on SQLite—simply leave `DATABASE_URL` unset and the app will write to `data/delivery.sqlite`.
 
 ## Scripts
 - `npm run dev` – start Next.js in development

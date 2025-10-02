@@ -1,6 +1,7 @@
 node_modules
 .next
 .env
+.env.local
 *.sqlite
 *.sqlite-wal
 *.sqlite-shm
