@@ -121,6 +121,15 @@ describe('submitReport', () => {
       })
     ).rejects.toMatchObject({ message: expect.stringContaining('does not deliver letters on Sundays') });
 
+    await expect(
+      submitReport({
+        postcode: 'SW1A 1AA',
+        deliveryDate: sunday,
+        deliveryTime: '12:05',
+        deliveryType: 'parcels'
+      })
+    ).resolves.toEqual({ normalisedPostcode: 'SW1A 1AA' });
+
     const tomorrow = (() => {
       const date = new Date();
       date.setDate(date.getDate() + 1);

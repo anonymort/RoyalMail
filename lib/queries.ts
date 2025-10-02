@@ -18,6 +18,50 @@ const LATEST_DELIVERY_MINUTES = 20 * 60 + 30; // 20:30 buffer for late urban rou
 
 export class ValidationError extends Error {}
 
+function parseIsoDateToUtc(dateIso: string): Date {
+  const [yearStr, monthStr, dayStr] = dateIso.split('-');
+  const year = Number(yearStr);
+  const month = Number(monthStr);
+  const day = Number(dayStr);
+
+  if (
+    !yearStr ||
+    !monthStr ||
+    !dayStr ||
+    Number.isNaN(year) ||
+    Number.isNaN(month) ||
+    Number.isNaN(day)
+  ) {
+    throw new ValidationError('Delivery date must follow YYYY-MM-DD.');
+  }
+
+  const utcDate = new Date(Date.UTC(year, month - 1, day));
+  if (
+    utcDate.getUTCFullYear() !== year ||
+    utcDate.getUTCMonth() !== month - 1 ||
+    utcDate.getUTCDate() !== day
+  ) {
+    throw new ValidationError('Delivery date is not recognised.');
+  }
+
+  return utcDate;
+}
+
+function getTodayUtcInLondon(): Date {
+  const formatter = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/London',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  });
+  const parts = formatter.formatToParts(new Date());
+  const lookup = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  const year = Number(lookup.year);
+  const month = Number(lookup.month);
+  const day = Number(lookup.day);
+  return new Date(Date.UTC(year, month - 1, day));
+}
+
 function daysAgoIso(days: number): string {
   const date = new Date();
   date.setDate(date.getDate() - days);
@@ -100,19 +144,17 @@ export async function submitReport(input: {
     throw new ValidationError('Delivery time should be between 06:00 and 20:30 to match Royal Mail operations.');
   }
 
-  const deliveryDateObj = new Date(`${deliveryDate}T00:00:00`);
-  if (Number.isNaN(deliveryDateObj.getTime())) {
-    throw new ValidationError('Delivery date is not recognised.');
-  }
+  const deliveryDateUtc = parseIsoDateToUtc(deliveryDate);
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  if (deliveryDateObj > today) {
+  const todayUtcLondon = getTodayUtcInLondon();
+  if (deliveryDateUtc > todayUtcLondon) {
     throw new ValidationError('Delivery date cannot be in the future.');
   }
 
-  const dayOfWeek = deliveryDateObj.getDay();
-  if (dayOfWeek === 0) {
+  const dayOfWeek = deliveryDateUtc.getUTCDay();
+  const normalisedDeliveryType = input.deliveryType.toLowerCase();
+  const prohibitsSunday = normalisedDeliveryType === 'letters';
+  if (dayOfWeek === 0 && prohibitsSunday) {
     throw new ValidationError('Royal Mail does not deliver letters on Sundays.');
   }
 
