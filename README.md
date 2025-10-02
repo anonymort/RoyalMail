@@ -13,6 +13,7 @@ Minimal Next.js 15 app that crowdsources Royal Mail delivery times per postcode 
    ```bash
    npm install
    ```
+   (Peer deps are relaxed via `.npmrc` so React 19 RC works with Recharts.)
 2. Run the strict lint/typecheck suite:
    ```bash
    npm run lint && npm run typecheck
