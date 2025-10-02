@@ -70,9 +70,9 @@ export function ReportForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid gap-4 sm:grid-cols-2">
-        <label className="space-y-2 text-sm text-cat-subtext0">
-          Postcode
+      <div className="grid gap-5 sm:grid-cols-2">
+        <label className="block text-sm text-cat-subtext0">
+          <span className="mb-2 block font-medium text-cat-subtext0">Postcode</span>
           <input
             type="text"
             value={formState.postcode}
@@ -83,26 +83,28 @@ export function ReportForm() {
             placeholder="M46 0TF"
           />
         </label>
-        <label className="space-y-2 text-sm text-cat-subtext0">
-          Delivery date
+        <label className="block text-sm text-cat-subtext0">
+          <span className="mb-2 block font-medium text-cat-subtext0">Delivery date</span>
           <input
             type="date"
             value={formState.deliveryDate}
             onChange={(event) => updateField('deliveryDate', event.target.value)}
             required
+            placeholder="YYYY-MM-DD"
           />
         </label>
-        <label className="space-y-2 text-sm text-cat-subtext0">
-          Delivery time
+        <label className="block text-sm text-cat-subtext0">
+          <span className="mb-2 block font-medium text-cat-subtext0">Delivery time</span>
           <input
             type="time"
             value={formState.deliveryTime}
             onChange={(event) => updateField('deliveryTime', event.target.value)}
             required
+            placeholder="HH:MM"
           />
         </label>
-        <label className="space-y-2 text-sm text-cat-subtext0">
-          Delivery type
+        <label className="block text-sm text-cat-subtext0">
+          <span className="mb-2 block font-medium text-cat-subtext0">Delivery type</span>
           <select
             value={formState.deliveryType}
             onChange={(event) => updateField('deliveryType', event.target.value as ReportFormState['deliveryType'])}
@@ -113,8 +115,8 @@ export function ReportForm() {
           </select>
         </label>
       </div>
-      <label className="space-y-2 text-sm text-cat-subtext0">
-        Optional note
+      <label className="block text-sm text-cat-subtext0">
+        <span className="mb-2 block font-medium text-cat-subtext0">Optional note</span>
         <textarea
           rows={3}
           value={formState.note}
