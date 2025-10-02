@@ -5,7 +5,7 @@ import { formatPostcodeForDisplay, parsePostcode } from '@/lib/postcodes';
 import { AggregatedStats } from '@/lib/types';
 
 interface PostcodePageProps {
-  params: { postcode: string };
+  params: Promise<{ postcode: string }>;
 }
 
 function formatMinutes(minutes: number | null) {
@@ -62,7 +62,8 @@ function StatsPanel({ stats }: { stats: AggregatedStats }) {
 }
 
 export default async function PostcodePage({ params }: PostcodePageProps) {
-  const postcode = decodeURIComponent(params.postcode);
+  const { postcode: rawPostcode } = await params;
+  const postcode = decodeURIComponent(rawPostcode);
   const parsed = parsePostcode(postcode);
   const displayPostcode = parsed?.normalised ?? formatPostcodeForDisplay(postcode);
   const summary = await getPostcodeSummary(postcode);

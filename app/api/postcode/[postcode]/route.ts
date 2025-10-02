@@ -3,10 +3,11 @@ import { getPostcodeSummary } from '@/lib/queries';
 
 export async function GET(
   _request: Request,
-  { params }: { params: { postcode: string } }
+  { params }: { params: Promise<{ postcode: string }> }
 ) {
   try {
-    const postcode = decodeURIComponent(params.postcode);
+    const { postcode: rawPostcode } = await params;
+    const postcode = decodeURIComponent(rawPostcode);
     const summary = await getPostcodeSummary(postcode);
 
     if (!summary) {

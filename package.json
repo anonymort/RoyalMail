@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "better-sqlite3": "^12.4.1",
-    "next": "15.0.0-canary.71",
+    "next": "15.5.4",
     "pg": "^8.11.3",
     "react": "19.0.0-rc.0",
     "react-dom": "19.0.0-rc.0",
@@ -29,7 +29,7 @@
     "@types/react-dom": "^18.3.0",
     "autoprefixer": "^10.4.16",
     "eslint": "^8.57.0",
-    "eslint-config-next": "15.0.0-canary.71",
+    "eslint-config-next": "15.5.4",
     "postcss": "^8.4.35",
     "tailwindcss": "^3.4.3",
     "typescript": "^5.4.2",

@@ -32,8 +32,8 @@ export default function PrivacyPolicyPage() {
           </li>
           <li>
             Aggregated telemetry from Google Analytics (GA4) limited to anonymised usage metrics (page views, device
-            type, approximate region). IP anonymisation is enforced by Google. No advertising identifiers are collected
-            unless the optional AdSense slot is enabled.
+            type, approximate region). IP anonymisation is enforced by Google, and we do not collect advertising
+            identifiers.
           </li>
         </ul>
         <p>We do not intentionally collect special category data. Please avoid including personal details within notes.</p>
@@ -49,10 +49,7 @@ export default function PrivacyPolicyPage() {
           <li>
             Development environments may use local SQLite databases which remain on the contributor&rsquo;s machine.
           </li>
-          <li>
-            Google Analytics and optional Google AdSense scripts are provided by Google LLC and store cookies consistent
-            with their respective privacy policies.
-          </li>
+          <li>Google Analytics is provided by Google LLC and stores cookies consistent with their privacy policy.</li>
         </ul>
         <p>Infrastructure access is limited to project maintainers via authenticated Railway accounts.</p>
       </section>
@@ -79,7 +76,7 @@ export default function PrivacyPolicyPage() {
         <h2 className="text-xl font-semibold text-cat-rosewater">Sharing and third parties</h2>
         <ul className="list-disc space-y-2 pl-6">
           <li>Railway Infrastructure, Inc. (hosting and managed Postgres).</li>
-          <li>Google LLC (Google Analytics GA4; optional Google AdSense if the environment variable is configured).</li>
+          <li>Google LLC (Google Analytics GA4).</li>
           <li>No other processors are engaged, and we never sell or transfer data for marketing purposes.</li>
         </ul>
       </section>

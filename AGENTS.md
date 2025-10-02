@@ -5,13 +5,15 @@
 - `components/` – Client and server React components (e.g., `ReportForm`, `PostcodeSearch`).
 - `lib/` – Shared utilities for data access, postcode parsing, and domain types.
 - `data/` – Local SQLite storage during development (Git-ignored WAL/SHM files).
+- `tests/unit/` & `tests/integration/` – Vitest suites covering helpers, validation, and DB-backed logic.
 - `tests/e2e/` – Playwright end-to-end specs. Add new tests close to related features.
 
 ## Build, Test, and Development Commands
 ```bash
 npm run dev          # Start Next.js locally at http://localhost:3000
-npm run lint         # Run eslint via next lint
+npm run lint         # Run eslint via next lint (Next.js may warn about workspace root discovery)
 npm run typecheck    # Run TypeScript in noEmit mode
+npm run test:unit    # Run Vitest unit + integration suites (uses a temp SQLite DB)
 npm run build        # Production bundle (runs lint+typecheck first)
 npm run test:e2e     # Playwright chromium suite with auto-started dev server
 ```
@@ -37,4 +39,5 @@ npm run test:e2e     # Playwright chromium suite with auto-started dev server
 - Production runs on Railway with a managed Postgres service (`Mail-Postgres`). Set the web service’s `DATABASE_URL` to the private hostname (`postgres.railway.internal:5432`) for best performance.
 - Local development defaults to SQLite under `data/delivery.sqlite`; copy `.env.example` to `.env.local` if you need to point at Postgres or override analytics IDs.
 - The live site is `https://mailtimes.up.railway.app` (port 8080). Use `npm run build && npm run start -- --hostname 0.0.0.0 --port 8080` locally to mirror the platform.
-- Keep optional analytics/ad IDs (`NEXT_PUBLIC_GA_MEASUREMENT_ID`, `NEXT_PUBLIC_GOOGLE_ADSENSE_CLIENT`) in `.env.local`, never in source control.
+- Keep optional analytics IDs (e.g., `NEXT_PUBLIC_GA_MEASUREMENT_ID`) in `.env.local`, never in source control.
+- Footer embeds a Buy Me a Coffee button; advertising slots have been removed in favour of donations.
