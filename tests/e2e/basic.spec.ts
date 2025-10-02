@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Royal Mail delivery app', () => {
-  test('home page loads core copy', async ({ page }) => {
+  test('home page loads core copy and analytics tag', async ({ page }) => {
     await page.goto('/');
 
     await expect(page.getByRole('heading', { name: 'Royal Mail delivery tracker' })).toBeVisible();
@@ -9,6 +9,11 @@ test.describe('Royal Mail delivery app', () => {
 
     const reportLinks = page.getByRole('link', { name: 'Report a delivery' });
     await expect(reportLinks).toHaveCount(2);
+
+    const privacyLink = page.getByRole('link', { name: 'Privacy Policy' });
+    await expect(privacyLink).toBeVisible();
+
+    await expect(page.locator('script[src*="googletagmanager.com/gtag/js"]').first()).toBeAttached();
   });
 
   test('postcode search normalises input and navigates', async ({ page }) => {
@@ -39,4 +44,5 @@ test.describe('Royal Mail delivery app', () => {
 
     await expect(page.getByRole('button', { name: 'Submit delivery report' })).toBeEnabled();
   });
+
 });

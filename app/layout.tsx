@@ -36,8 +36,13 @@ export default function RootLayout({
         </header>
         <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-6">{children}</main>
         <footer className="border-t border-cat-surface1 bg-cat-mantle">
-          <div className="mx-auto w-full max-w-4xl px-4 py-4 text-xs text-cat-overlay1">
-            Built for fast insight. Data is crowdsourced and may be incomplete.
+          <div className="mx-auto flex w-full max-w-4xl flex-col gap-2 px-4 py-4 text-xs text-cat-overlay1 sm:flex-row sm:items-center sm:justify-between">
+            <p>Built for fast insight. Data is crowdsourced and may be incomplete.</p>
+            <nav className="flex items-center gap-4 text-cat-subtext0">
+              <a href="/privacy" className="hover:text-cat-text">
+                Privacy Policy
+              </a>
+            </nav>
           </div>
         </footer>
       </body>
