@@ -8,6 +8,9 @@
 - `tests/unit/` & `tests/integration/` – Vitest suites covering helpers, validation, and DB-backed logic.
 - `tests/e2e/` – Playwright end-to-end specs. Add new tests close to related features.
 
+### Caching & Revalidation
+- Global stats (`getGlobalStats`) are cached via `unstable_cache` with the `global-stats` tag; `submitReport` calls `revalidateTag('global-stats')` after successful inserts. When running outside Next.js (e.g., Vitest) the helpers gracefully fall back to uncached execution.
+
 ## Build, Test, and Development Commands
 ```bash
 npm run dev          # Start Next.js locally at http://localhost:3000

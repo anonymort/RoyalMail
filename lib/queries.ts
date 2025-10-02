@@ -7,15 +7,12 @@ import {
   fetchReports,
   insertReport
 } from '@/lib/db';
+import { revalidateTag, unstable_cache } from 'next/cache';
 import { parsePostcode, formatPostcodeForDisplay } from '@/lib/postcodes';
-import {
-  AggregatedStats,
-  DeliveryType,
-  GlobalStats,
-  PostcodePayload
-} from '@/lib/types';
+import { AggregatedStats, DeliveryType, GlobalStats, PostcodePayload } from '@/lib/types';
 
 const DELIVERY_TYPES: DeliveryType[] = ['letters', 'parcels', 'both'];
+const GLOBAL_STATS_TAG = 'global-stats';
 
 function daysAgoIso(days: number): string {
   const date = new Date();
@@ -108,6 +105,12 @@ export async function submitReport(input: {
     note: input.note?.slice(0, 500)
   });
 
+  try {
+    await revalidateTag(GLOBAL_STATS_TAG);
+  } catch {
+    // Cache invalidation is unavailable outside the Next.js runtime (e.g. Vitest).
+  }
+
   return { normalisedPostcode: parsed.normalised };
 }
 
@@ -159,7 +162,7 @@ function buildContinuousDailySeries(
   return output;
 }
 
-export async function getGlobalStats(): Promise<GlobalStats> {
+const computeGlobalStats = async (): Promise<GlobalStats> => {
   const [counts, deliveryTypeRows] = await Promise.all([fetchGlobalCounts(), fetchDeliveryTypeCounts()]);
 
   const rollingWindowStart = daysAgoIso(30);
@@ -192,4 +195,18 @@ export async function getGlobalStats(): Promise<GlobalStats> {
     deliveryTypeBreakdown,
     rollingWindowStart
   };
+};
+
+const getGlobalStatsCached = unstable_cache(computeGlobalStats, [GLOBAL_STATS_TAG], {
+  tags: [GLOBAL_STATS_TAG],
+  revalidate: 300
+});
+
+export async function getGlobalStats(): Promise<GlobalStats> {
+  try {
+    return await getGlobalStatsCached();
+  } catch {
+    // Fallback when the incremental cache is unavailable (tests or non-Next runtimes).
+    return computeGlobalStats();
+  }
 }
