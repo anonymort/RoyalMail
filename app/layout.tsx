@@ -36,18 +36,20 @@ export default function RootLayout({
         </header>
         <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-6">{children}</main>
         <footer className="border-t border-cat-surface1 bg-cat-mantle">
-          <div className="mx-auto flex w-full max-w-4xl flex-col gap-2 px-4 py-4 text-xs text-cat-overlay1 sm:flex-row sm:items-center sm:justify-between">
-            <p>Built for fast insight. Data is crowdsourced and may be incomplete.</p>
-            <nav className="flex flex-col items-start gap-2 text-cat-subtext0 sm:flex-row sm:items-center">
-              <Link href="/privacy" className="hover:text-cat-text">
-                Privacy Policy
-              </Link>
-              <div className="inline-flex items-center">
+          <div className="mx-auto w-full max-w-4xl px-4 py-6 text-xs text-cat-overlay1">
+            <div className="flex flex-col gap-6 sm:gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <p className="text-center leading-relaxed sm:text-left">
+                Built for fast insight. Data is crowdsourced and may be incomplete.
+              </p>
+              <nav className="flex flex-col items-center gap-3 text-cat-subtext0 sm:flex-row sm:justify-center lg:justify-end">
+                <Link href="/privacy" className="transition hover:text-cat-text">
+                  Privacy Policy
+                </Link>
                 <a
                   href="https://www.buymeacoffee.com/mattkneale"
                   rel="noopener noreferrer"
                   target="_blank"
-                  className="inline-flex items-center"
+                  className="inline-flex items-center justify-center rounded-md bg-cat-surface1 px-3 py-2 transition hover:bg-cat-surface2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cat-sky"
                 >
                   <Image
                     src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png"
@@ -58,8 +60,8 @@ export default function RootLayout({
                     priority={false}
                   />
                 </a>
-              </div>
-            </nav>
+              </nav>
+            </div>
           </div>
         </footer>
       </body>

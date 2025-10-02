@@ -37,7 +37,10 @@ export async function DataHighlights() {
             resilient against outliers.
           </p>
         </div>
-        <Link href="/report" className="inline-flex items-center gap-2 rounded-full border border-cat-sky px-3 py-1 text-sm text-cat-sky">
+        <Link
+          href="/report"
+          className="inline-flex w-full items-center justify-center rounded-md bg-accent px-4 py-2 text-sm font-medium text-cat-crust transition hover:bg-cat-blue/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cat-sky sm:w-auto"
+        >
           Contribute your delivery
         </Link>
       </div>
