@@ -13,11 +13,16 @@ Minimal Next.js 15 app that crowdsources Royal Mail delivery times per postcode 
    ```bash
    npm install
    ```
-2. Run the dev server (creates `data/delivery.sqlite` automatically):
+2. Run the strict lint/typecheck suite:
+   ```bash
+   npm run lint && npm run typecheck
+   ```
+   (Next.js also runs these during `npm run build`.)
+3. Run the dev server (creates `data/delivery.sqlite` automatically):
    ```bash
    npm run dev
    ```
-3. Visit `http://localhost:3000`.
+4. Visit `http://localhost:3000`.
 
 ## Environment variables
 | Variable | Purpose |
@@ -46,6 +51,7 @@ If Railway volumes are unavailable, attach a Postgres add-on and set its connect
 - `npm run build` – production build
 - `npm run start` – launch production server
 - `npm run lint` – basic lint checks via `eslint-config-next`
+- `npm run typecheck` – strict TypeScript check (`tsc --noEmit`)
 
 ## Notes
 - Delivery stats aggregate the last 30 days of reports.
