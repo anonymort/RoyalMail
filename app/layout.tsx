@@ -1,6 +1,7 @@
 import './globals.css';
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
+import { Suspense } from 'react';
 import { OptionalAnalytics } from '@/components/OptionalAnalytics';
 import { AdsSlot } from '@/components/AdsSlot';
 
@@ -17,7 +18,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="flex min-h-screen flex-col">
-        <OptionalAnalytics />
+        <Suspense fallback={null}>
+          <OptionalAnalytics />
+        </Suspense>
         <AdsSlot />
         <header className="border-b border-cat-surface1 bg-cat-mantle">
           <div className="mx-auto flex w-full max-w-4xl items-center justify-between px-4 py-4">
