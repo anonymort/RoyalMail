@@ -14,6 +14,15 @@
 ### Data quality checks
 - `submitReport` throws a `ValidationError` when submissions fall outside operational heuristics (non-postcodes, malformed timestamps, Sundays, future dates, or times outside 06:00–20:30). API callers should surface the error message back to users.
 
+### Codex CLI & Railway MCP setup (Royal Mail Delivery Times on Railway)
+- **This project (Royal Mail Delivery Times) is deployed on Railway** and uses Railway MCP for all deployment and infrastructure management.
+- Local Codex CLI tooling lives outside the repo. Use `setup-codex-railway.sh` to install the Railway CLI, populate `~/.codex/config.toml`, and place the TOML-based `codex-config.toml`.
+- Reference docs sit in `CODEX_RAILWAY_MCP.md`. All Codex-specific files are gitignored and must **not** be committed.
+- **Railway Project**: Royal Mail Delivery Times
+- **Production URL**: https://mailtimes.up.railway.app
+- **Database**: Mail-Postgres (managed Postgres on Railway)
+- **All deployments must go through Railway MCP** using natural language commands via Codex CLI
+
 ## Build, Test, and Development Commands
 ```bash
 npm run dev          # Start Next.js locally at http://localhost:3000
@@ -40,10 +49,17 @@ npm run test:e2e     # Playwright chromium suite with auto-started dev server
 - Commits should bundle one logical change set and include updated tests or docs when relevant.
 - PRs must summarize the change, list testing evidence (`npm run build`, `npm run test:e2e`), and link to tracking issues. Add screenshots/GIFs for UI tweaks.
 
-## Environment & Deployment Notes
+## Environment & Deployment Notes (Royal Mail Delivery Times on Railway)
 - Node 24+ is supported; ensure `npm install` completes without `--ignore-scripts` to build native deps (`better-sqlite3`).
-- Production runs on Railway with a managed Postgres service (`Mail-Postgres`). Set the web service’s `DATABASE_URL` to the private hostname (`postgres.railway.internal:5432`) for best performance.
+- **Production deployment**: This Royal Mail Delivery Times project runs exclusively on Railway with a managed Postgres service (`Mail-Postgres`).
+- **Railway MCP is the primary deployment method**: Use Codex CLI with Railway MCP for all deployments and infrastructure changes.
+- Set the web service's `DATABASE_URL` to the private hostname (`postgres.railway.internal:5432`) for best performance.
 - Local development defaults to SQLite under `data/delivery.sqlite`; copy `.env.example` to `.env.local` if you need to point at Postgres or override analytics IDs.
-- The live site is `https://mailtimes.up.railway.app` (port 8080). Use `npm run build && npm run start -- --hostname 0.0.0.0 --port 8080` locally to mirror the platform.
+- The live Royal Mail Delivery Times site is `https://mailtimes.up.railway.app` (port 8080). Use `npm run build && npm run start -- --hostname 0.0.0.0 --port 8080` locally to mirror the platform.
+- **Deployment workflow via Railway MCP**:
+  1. Authenticate: `railway login`
+  2. Use Codex CLI with natural language: "Deploy Royal Mail Delivery Times to Railway"
+  3. Monitor: "Show deployment logs for Royal Mail Delivery Times"
+  4. Configure: "Set environment variables for Royal Mail Delivery Times service"
 - Keep optional analytics IDs (e.g., `NEXT_PUBLIC_GA_MEASUREMENT_ID`) in `.env.local`, never in source control.
 - Footer embeds a Buy Me a Coffee button; advertising slots have been removed in favour of donations.

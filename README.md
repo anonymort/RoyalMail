@@ -14,6 +14,7 @@ Minimal Next.js 15 app that crowdsources Royal Mail delivery times per postcode 
 - Report form with a “Why your report matters” snapshot reinforcing community contribution impact
 - Global stats cached for 5 minutes and auto-invalidated when new delivery reports land
 - Quality controls block submissions outside Royal Mail operating hours, future dates, or Sunday letter slots
+- Codex CLI scaffolding (setup script, TOML config, and MCP docs) lives in this repo but stays out of version control—use `./setup-codex-railway.sh` locally as needed
 
 ## Getting started
 1. Install dependencies:
