@@ -13,6 +13,7 @@ Minimal Next.js 15 app that crowdsources Royal Mail delivery times per postcode 
 - Homepage “Community data pulse” summarising total reports, coverage, latest submission, and median arrival time plus daily trend & delivery-type visuals
 - Report form with a “Why your report matters” snapshot reinforcing community contribution impact
 - Global stats cached for 5 minutes and auto-invalidated when new delivery reports land
+- Quality controls block submissions outside Royal Mail operating hours, future dates, or Sunday letter slots
 
 ## Getting started
 1. Install dependencies:
@@ -71,3 +72,4 @@ Minimal Next.js 15 app that crowdsources Royal Mail delivery times per postcode 
 - Histogram buckets are 15 minutes to keep the UI legible, and the homepage sparkline spans the last 14 days.
 - Cached global metrics revalidate immediately after successful submissions outside of test runs.
 - During builds without database connectivity the global snapshot gracefully falls back to placeholder zeros so static generation can complete.
+- Delivery submissions must fall between 06:00–20:30, avoid Sundays, and cannot be set in the future to reduce noise.

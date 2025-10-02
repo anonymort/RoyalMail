@@ -13,6 +13,10 @@ import { AggregatedStats, DeliveryType, GlobalStats, PostcodePayload } from '@/l
 
 const DELIVERY_TYPES: DeliveryType[] = ['letters', 'parcels', 'both'];
 const GLOBAL_STATS_TAG = 'global-stats';
+const EARLIEST_DELIVERY_MINUTES = 6 * 60; // 06:00 buffer for exceptional early rounds
+const LATEST_DELIVERY_MINUTES = 20 * 60 + 30; // 20:30 buffer for late urban rounds
+
+export class ValidationError extends Error {}
 
 function daysAgoIso(days: number): string {
   const date = new Date();
@@ -70,27 +74,47 @@ export async function submitReport(input: {
   deliveryTime: string;
   deliveryType: string;
   note?: string;
-}): Promise<{ normalisedPostcode: string } | null> {
+}): Promise<{ normalisedPostcode: string }> {
   const parsed = parsePostcode(input.postcode);
   if (!parsed) {
-    return null;
+    throw new ValidationError('Enter a valid UK postcode.');
   }
 
   const deliveryDate = input.deliveryDate;
   if (!/^\d{4}-\d{2}-\d{2}$/.test(deliveryDate)) {
-    return null;
+    throw new ValidationError('Delivery date must follow YYYY-MM-DD.');
   }
 
   const timeMatch = input.deliveryTime.match(/^(\d{2}):(\d{2})$/);
   if (!timeMatch) {
-    return null;
+    throw new ValidationError('Delivery time must follow HH:MM (24-hour).');
   }
   const hours = Number(timeMatch[1]);
   const minutes = Number(timeMatch[2]);
   if (!Number.isFinite(hours) || !Number.isFinite(minutes) || hours > 23 || minutes > 59) {
-    return null;
+    throw new ValidationError('Delivery time must be a valid time of day.');
   }
   const minutesSinceMidnight = hours * 60 + minutes;
+
+  if (minutesSinceMidnight < EARLIEST_DELIVERY_MINUTES || minutesSinceMidnight > LATEST_DELIVERY_MINUTES) {
+    throw new ValidationError('Delivery time should be between 06:00 and 20:30 to match Royal Mail operations.');
+  }
+
+  const deliveryDateObj = new Date(`${deliveryDate}T00:00:00`);
+  if (Number.isNaN(deliveryDateObj.getTime())) {
+    throw new ValidationError('Delivery date is not recognised.');
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  if (deliveryDateObj > today) {
+    throw new ValidationError('Delivery date cannot be in the future.');
+  }
+
+  const dayOfWeek = deliveryDateObj.getDay();
+  if (dayOfWeek === 0) {
+    throw new ValidationError('Royal Mail does not deliver letters on Sundays.');
+  }
 
   const deliveryType = DELIVERY_TYPES.includes(input.deliveryType as DeliveryType)
     ? (input.deliveryType as DeliveryType)

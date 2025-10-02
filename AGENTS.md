@@ -11,6 +11,9 @@
 ### Caching & Revalidation
 - Global stats (`getGlobalStats`) are cached via `unstable_cache` with the `global-stats` tag; `submitReport` calls `revalidateTag('global-stats')` after successful inserts. When running outside Next.js (e.g., Vitest) the helpers gracefully fall back to uncached execution, and if the database is unavailable a placeholder zero snapshot is returned so prerenders do not fail.
 
+### Data quality checks
+- `submitReport` throws a `ValidationError` when submissions fall outside operational heuristics (non-postcodes, malformed timestamps, Sundays, future dates, or times outside 06:00–20:30). API callers should surface the error message back to users.
+
 ## Build, Test, and Development Commands
 ```bash
 npm run dev          # Start Next.js locally at http://localhost:3000

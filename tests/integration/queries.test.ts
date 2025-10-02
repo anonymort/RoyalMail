@@ -11,6 +11,7 @@ let submitReport: (typeof import('@/lib/queries'))['submitReport'];
 let getPostcodeSummary: (typeof import('@/lib/queries'))['getPostcodeSummary'];
 let getGlobalStats: (typeof import('@/lib/queries'))['getGlobalStats'];
 let fetchReports: (typeof import('@/lib/db'))['fetchReports'];
+let ValidationError: typeof import('@/lib/queries')['ValidationError'];
 
 beforeEach(async () => {
   tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'royalmail-tests-'));
@@ -18,7 +19,7 @@ beforeEach(async () => {
   process.env.DATABASE_URL = '';
   process.env.SQLITE_PATH = sqlitePath;
   vi.resetModules();
-  ({ submitReport, getPostcodeSummary, getGlobalStats } = await import('@/lib/queries'));
+  ({ submitReport, getPostcodeSummary, getGlobalStats, ValidationError } = await import('@/lib/queries'));
   ({ fetchReports } = await import('@/lib/db'));
 });
 
@@ -56,32 +57,84 @@ describe('submitReport', () => {
   });
 
   it('rejects invalid data', async () => {
-    expect(
-      await submitReport({
+    await expect(
+      submitReport({
         postcode: 'not-a-postcode',
         deliveryDate: today,
         deliveryTime: '10:00',
         deliveryType: 'letters'
       })
-    ).toBeNull();
+    ).rejects.toBeInstanceOf(ValidationError);
 
-    expect(
-      await submitReport({
+    await expect(
+      submitReport({
         postcode: 'SW1A 1AA',
         deliveryDate: '',
         deliveryTime: '10:00',
         deliveryType: 'letters'
       })
-    ).toBeNull();
+    ).rejects.toBeInstanceOf(ValidationError);
 
-    expect(
-      await submitReport({
+    await expect(
+      submitReport({
         postcode: 'SW1A 1AA',
         deliveryDate: today,
         deliveryTime: '25:61',
         deliveryType: 'letters'
       })
-    ).toBeNull();
+    ).rejects.toBeInstanceOf(ValidationError);
+  });
+
+  it('rejects deliveries outside operational constraints', async () => {
+    await expect(
+      submitReport({
+        postcode: 'SW1A 1AA',
+        deliveryDate: today,
+        deliveryTime: '05:15',
+        deliveryType: 'letters'
+      })
+    ).rejects.toMatchObject({ message: expect.stringContaining('Delivery time should be between 06:00 and 20:30') });
+
+    await expect(
+      submitReport({
+        postcode: 'SW1A 1AA',
+        deliveryDate: today,
+        deliveryTime: '21:45',
+        deliveryType: 'letters'
+      })
+    ).rejects.toBeInstanceOf(ValidationError);
+
+    const sunday = (() => {
+      const date = new Date();
+      const day = date.getDay();
+      const diff = day === 0 ? 0 : day; // go back to the most recent Sunday
+      date.setDate(date.getDate() - diff);
+      return date.toISOString().slice(0, 10);
+    })();
+
+    await expect(
+      submitReport({
+        postcode: 'SW1A 1AA',
+        deliveryDate: sunday,
+        deliveryTime: '09:30',
+        deliveryType: 'letters'
+      })
+    ).rejects.toMatchObject({ message: expect.stringContaining('does not deliver letters on Sundays') });
+
+    const tomorrow = (() => {
+      const date = new Date();
+      date.setDate(date.getDate() + 1);
+      return date.toISOString().slice(0, 10);
+    })();
+
+    await expect(
+      submitReport({
+        postcode: 'SW1A 1AA',
+        deliveryDate: tomorrow,
+        deliveryTime: '09:30',
+        deliveryType: 'letters'
+      })
+    ).rejects.toMatchObject({ message: expect.stringContaining('cannot be in the future') });
   });
 });
 

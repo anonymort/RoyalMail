@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { submitReport } from '@/lib/queries';
+import { ValidationError, submitReport } from '@/lib/queries';
 
 export async function POST(request: Request) {
   try {
@@ -12,12 +12,11 @@ export async function POST(request: Request) {
       note: payload?.note
     });
 
-    if (!result) {
-      return NextResponse.json({ error: 'Invalid payload' }, { status: 400 });
-    }
-
     return NextResponse.json(result, { status: 201 });
   } catch (error) {
+    if (error instanceof ValidationError) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
     console.error('POST /api/report failed', error);
     return NextResponse.json({ error: 'Unable to save report' }, { status: 500 });
   }
