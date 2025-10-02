@@ -45,8 +45,8 @@ export default function RootLayout({
               <div className="inline-flex items-center">
                 <Script
                   id="buy-me-a-coffee"
-                  strategy="lazyOnload"
                   src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js"
+                  strategy="beforeInteractive"
                   data-name="bmc-button"
                   data-slug="mattkneale"
                   data-color="#5F7FFF"
