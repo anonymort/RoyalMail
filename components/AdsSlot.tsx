@@ -49,7 +49,7 @@ export function AdsSlot() {
   if (!clientId || !enabled) return null;
 
   return (
-    <aside className="fixed bottom-4 right-4 hidden w-[300px] max-w-full rounded-xl border border-cat.surface2 bg-cat.surface0 p-2 shadow-lg lg:block">
+    <aside className="fixed bottom-4 right-4 hidden w-[300px] max-w-full rounded-xl border border-cat-surface2 bg-cat-surface0 p-2 shadow-lg lg:block">
       <ins
         className="adsbygoogle block h-[250px] w-full"
         style={{ display: 'block' }}

@@ -30,11 +30,11 @@ function formatMinutes(minutes: number) {
 
 export function DeliveryHistogram({ data }: DeliveryHistogramProps) {
   if (!data.length) {
-    return <p className="text-sm text-cat.overlay1">Not enough reports for a histogram yet.</p>;
+    return <p className="text-sm text-cat-overlay1">Not enough reports for a histogram yet.</p>;
   }
 
   return (
-    <div className="h-64 w-full bg-cat.surface0/60 p-4">
+    <div className="h-64 w-full bg-cat-surface0/60 p-4">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} margin={{ top: 8, right: 12, left: -8, bottom: 16 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#45475a" />
@@ -51,8 +51,8 @@ export function DeliveryHistogram({ data }: DeliveryHistogramProps) {
               if (!active || !payload?.length) return null;
               const entry = payload[0]?.payload as HistogramDatum;
               return (
-                <div className="rounded-md border border-cat.surface2 bg-cat.surface1 px-3 py-2 text-sm text-cat.text shadow">
-                  <div className="font-medium text-cat.sky">{entry.count} report(s)</div>
+                <div className="rounded-md border border-cat-surface2 bg-cat-surface1 px-3 py-2 text-sm text-cat-text shadow">
+                  <div className="font-medium text-cat-sky">{entry.count} report(s)</div>
                   <div>
                     {formatMinutes(entry.binStart)} – {formatMinutes(entry.binEnd)}
                   </div>

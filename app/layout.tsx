@@ -19,21 +19,21 @@ export default function RootLayout({
       <body className="flex min-h-screen flex-col">
         <OptionalAnalytics />
         <AdsSlot />
-        <header className="border-b border-cat.surface1 bg-cat.mantle">
+        <header className="border-b border-cat-surface1 bg-cat-mantle">
           <div className="mx-auto flex w-full max-w-4xl items-center justify-between px-4 py-4">
-            <a href="/" className="text-lg font-semibold text-cat.rosewater">
+            <a href="/" className="text-lg font-semibold text-cat-rosewater">
               Royal Mail Delivery Times
             </a>
-            <nav className="text-sm text-cat.subtext0">
-              <a href="/report" className="hover:text-cat.text">
+            <nav className="text-sm text-cat-subtext0">
+              <a href="/report" className="hover:text-cat-text">
                 Report a delivery
               </a>
             </nav>
           </div>
         </header>
         <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-6">{children}</main>
-        <footer className="border-t border-cat.surface1 bg-cat.mantle">
-          <div className="mx-auto w-full max-w-4xl px-4 py-4 text-xs text-cat.overlay1">
+        <footer className="border-t border-cat-surface1 bg-cat-mantle">
+          <div className="mx-auto w-full max-w-4xl px-4 py-4 text-xs text-cat-overlay1">
             Built for fast insight. Data is crowdsourced and may be incomplete.
           </div>
         </footer>

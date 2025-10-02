@@ -70,7 +70,7 @@ export function ReportForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid gap-4 sm:grid-cols-2">
-        <label className="space-y-2 text-sm text-cat.subtext0">
+        <label className="space-y-2 text-sm text-cat-subtext0">
           Postcode
           <input
             type="text"
@@ -80,7 +80,7 @@ export function ReportForm() {
             placeholder="M46 0TF"
           />
         </label>
-        <label className="space-y-2 text-sm text-cat.subtext0">
+        <label className="space-y-2 text-sm text-cat-subtext0">
           Delivery date
           <input
             type="date"
@@ -89,7 +89,7 @@ export function ReportForm() {
             required
           />
         </label>
-        <label className="space-y-2 text-sm text-cat.subtext0">
+        <label className="space-y-2 text-sm text-cat-subtext0">
           Delivery time
           <input
             type="time"
@@ -98,7 +98,7 @@ export function ReportForm() {
             required
           />
         </label>
-        <label className="space-y-2 text-sm text-cat.subtext0">
+        <label className="space-y-2 text-sm text-cat-subtext0">
           Delivery type
           <select
             value={formState.deliveryType}
@@ -110,7 +110,7 @@ export function ReportForm() {
           </select>
         </label>
       </div>
-      <label className="space-y-2 text-sm text-cat.subtext0">
+      <label className="space-y-2 text-sm text-cat-subtext0">
         Optional note
         <textarea
           rows={3}
@@ -120,12 +120,12 @@ export function ReportForm() {
           className="w-full"
         />
       </label>
-      {error && <div className="rounded-md border border-cat.maroon/40 bg-cat.maroon/10 p-3 text-sm text-cat.maroon">{error}</div>}
+      {error && <div className="rounded-md border border-cat-maroon/40 bg-cat-maroon/10 p-3 text-sm text-cat-maroon">{error}</div>}
       <button type="submit" disabled={status === 'submitting'}>
         {status === 'submitting' ? 'Sending…' : 'Submit delivery report'}
       </button>
       {status === 'success' && (
-        <p className="text-sm text-cat.green">Thanks! Redirecting to the postcode summary…</p>
+        <p className="text-sm text-cat-green">Thanks! Redirecting to the postcode summary…</p>
       )}
     </form>
   );
