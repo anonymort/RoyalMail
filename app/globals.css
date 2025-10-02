@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-background text-foreground min-h-screen antialiased;
+}
+
+a {
+  @apply text-accent hover:underline;
+}
+
+input, select, textarea {
+  @apply bg-cat.surface0 border border-cat.surface2 rounded-md px-3 py-2 text-sm text-cat.text placeholder:text-cat.overlay1;
+}
+
+button {
+  @apply inline-flex items-center justify-center rounded-md bg-accent px-4 py-2 text-sm font-medium text-cat.crust transition hover:bg-cat.blue/80 disabled:opacity-50 disabled:cursor-not-allowed;
+}
