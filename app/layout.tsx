@@ -1,6 +1,6 @@
 import './globals.css';
+import Image from 'next/image';
 import Link from 'next/link';
-import Script from 'next/script';
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { Suspense } from 'react';
@@ -43,31 +43,21 @@ export default function RootLayout({
                 Privacy Policy
               </Link>
               <div className="inline-flex items-center">
-                <Script
-                  id="buy-me-a-coffee"
-                  src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js"
-                  strategy="beforeInteractive"
-                  data-name="bmc-button"
-                  data-slug="mattkneale"
-                  data-color="#5F7FFF"
-                  data-emoji=""
-                  data-font="Poppins"
-                  data-text="Supply my caffeine"
-                  data-outline-color="#000000"
-                  data-font-color="#ffffff"
-                  data-coffee-color="#FFDD00"
-                  type="text/javascript"
-                />
-                <noscript>
-                  <a
-                    href="https://www.buymeacoffee.com/mattkneale"
-                    className="text-cat-sky hover:text-cat-text"
-                    rel="noopener noreferrer"
-                    target="_blank"
-                  >
-                    Supply my caffeine
-                  </a>
-                </noscript>
+                <a
+                  href="https://www.buymeacoffee.com/mattkneale"
+                  rel="noopener noreferrer"
+                  target="_blank"
+                  className="inline-flex items-center"
+                >
+                  <Image
+                    src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png"
+                    alt="Buy me a coffee"
+                    width={156}
+                    height={46}
+                    className="h-10 w-auto"
+                    priority={false}
+                  />
+                </a>
               </div>
             </nav>
           </div>

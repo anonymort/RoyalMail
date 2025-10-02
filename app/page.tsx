@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { DataHighlights } from '@/components/DataHighlights';
 import { PostcodeSearch } from '@/components/PostcodeSearch';
 
+export const dynamic = 'force-dynamic';
+
 export default function HomePage() {
   return (
     <div className="space-y-8">

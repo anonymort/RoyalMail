@@ -3,6 +3,8 @@ import { Suspense } from 'react';
 import { ContributionSnapshot } from '@/components/ContributionSnapshot';
 import { ReportForm } from '@/components/ReportForm';
 
+export const dynamic = 'force-dynamic';
+
 export default function ReportPage() {
   return (
     <section className="space-y-6">
