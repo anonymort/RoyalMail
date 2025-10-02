@@ -6,6 +6,10 @@ test.describe('Royal Mail delivery app', () => {
 
     await expect(page.getByRole('heading', { name: 'Royal Mail delivery tracker' })).toBeVisible();
     await expect(page.getByText('Crowd-sourced arrival times').first()).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Community data pulse' })).toBeVisible();
+    await expect(page.getByText('Reports collected', { exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Daily submission trend' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Delivery type mix' })).toBeVisible();
 
     const reportLinks = page.getByRole('link', { name: 'Report a delivery' });
     await expect(reportLinks).toHaveCount(2);
@@ -32,6 +36,7 @@ test.describe('Royal Mail delivery app', () => {
     await page.goto('/report');
 
     await expect(page.getByLabel('Postcode')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Why your report matters' })).toBeVisible();
     const postcodeField = page.getByLabel('Postcode');
     await postcodeField.fill('m460tf');
     await expect(postcodeField).toHaveValue('M46 0TF');

@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 - `app/` – Next.js App Router routes (`page.tsx`, API handlers, layouts) and global styles in `app/globals.css`.
-- `components/` – Client and server React components (e.g., `ReportForm`, `PostcodeSearch`).
+- `components/` – Client and server React components (e.g., `ReportForm`, `PostcodeSearch`, `DataHighlights`, `ContributionSnapshot`).
 - `lib/` – Shared utilities for data access, postcode parsing, and domain types.
 - `data/` – Local SQLite storage during development (Git-ignored WAL/SHM files).
 - `tests/unit/` & `tests/integration/` – Vitest suites covering helpers, validation, and DB-backed logic.

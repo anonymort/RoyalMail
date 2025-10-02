@@ -1,6 +1,19 @@
-import { fetchLatestTimestamp, fetchReports, insertReport } from '@/lib/db';
+import {
+  fetchDailyReportCounts,
+  fetchDeliveryTypeCounts,
+  fetchGlobalCounts,
+  fetchLatestTimestamp,
+  fetchMinutesSince,
+  fetchReports,
+  insertReport
+} from '@/lib/db';
 import { parsePostcode, formatPostcodeForDisplay } from '@/lib/postcodes';
-import { AggregatedStats, DeliveryType, PostcodePayload } from '@/lib/types';
+import {
+  AggregatedStats,
+  DeliveryType,
+  GlobalStats,
+  PostcodePayload
+} from '@/lib/types';
 
 const DELIVERY_TYPES: DeliveryType[] = ['letters', 'parcels', 'both'];
 
@@ -125,4 +138,58 @@ export async function getPostcodeSummary(postcode: string): Promise<(PostcodePay
   };
 
   return summary;
+}
+
+function buildContinuousDailySeries(
+  startIso: string,
+  days: number,
+  raw: Array<{ date: string; count: number }>
+) {
+  const startDate = new Date(startIso);
+  const output: Array<{ date: string; count: number }> = [];
+  const lookup = new Map(raw.map((entry) => [entry.date, entry.count]));
+
+  for (let offset = 0; offset < days; offset += 1) {
+    const current = new Date(startDate);
+    current.setDate(startDate.getDate() + offset);
+    const iso = current.toISOString().slice(0, 10);
+    output.push({ date: iso, count: lookup.get(iso) ?? 0 });
+  }
+
+  return output;
+}
+
+export async function getGlobalStats(): Promise<GlobalStats> {
+  const [counts, deliveryTypeRows] = await Promise.all([fetchGlobalCounts(), fetchDeliveryTypeCounts()]);
+
+  const rollingWindowStart = daysAgoIso(30);
+  const [dailyRows, minutesLast30Days] = await Promise.all([
+    fetchDailyReportCounts(daysAgoIso(13)),
+    fetchMinutesSince(rollingWindowStart)
+  ]);
+
+  const deliveryTypeOrder: DeliveryType[] = ['letters', 'parcels', 'both'];
+  const deliveryTypeMap = new Map(deliveryTypeRows.map((row) => [row.delivery_type, Number(row.count)]));
+  const deliveryTypeBreakdown = deliveryTypeOrder.map((type) => ({
+    type,
+    count: deliveryTypeMap.get(type) ?? 0
+  }));
+
+  const dailySeriesStart = daysAgoIso(13);
+  const dailyReports = buildContinuousDailySeries(dailySeriesStart, 14, dailyRows);
+
+  return {
+    totals: {
+      totalReports: counts.total_reports,
+      uniquePostcodes: counts.unique_postcodes,
+      uniqueSectors: counts.unique_sectors,
+      last24hReports: counts.last_24h_reports,
+      last7dReports: counts.last_7d_reports
+    },
+    lastSubmissionAt: counts.last_submission_at,
+    medianMinutesLast30Days: computeMedian(minutesLast30Days),
+    dailyReports,
+    deliveryTypeBreakdown,
+    rollingWindowStart
+  };
 }

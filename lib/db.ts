@@ -4,6 +4,25 @@ import BetterSqlite3 from 'better-sqlite3';
 import { Pool } from 'pg';
 import { DeliveryReportRow, DeliveryType } from '@/lib/types';
 
+export interface GlobalCountsRow {
+  total_reports: number;
+  unique_postcodes: number;
+  unique_sectors: number;
+  last_24h_reports: number;
+  last_7d_reports: number;
+  last_submission_at: string | null;
+}
+
+export interface DeliveryTypeCountRow {
+  delivery_type: DeliveryType;
+  count: number;
+}
+
+export interface DailyReportsRow {
+  date: string;
+  count: number;
+}
+
 type SqliteInstance = BetterSqlite3.Database;
 
 const DATABASE_URL = process.env.DATABASE_URL;
@@ -173,4 +192,133 @@ export async function fetchLatestTimestamp(outwardSector: string): Promise<strin
   );
   const row = statement.get(outwardSector) as { submitted_at: string } | undefined;
   return row?.submitted_at ?? null;
+}
+
+export async function fetchGlobalCounts(): Promise<GlobalCountsRow> {
+  if (isPostgres) {
+    const pool = await ensurePostgres();
+    const result = await pool.query<GlobalCountsRow>(
+      `
+        SELECT
+          COUNT(*)::int AS total_reports,
+          COUNT(DISTINCT postcode)::int AS unique_postcodes,
+          COUNT(DISTINCT outward_sector)::int AS unique_sectors,
+          COUNT(*) FILTER (WHERE submitted_at >= NOW() - INTERVAL '1 day')::int AS last_24h_reports,
+          COUNT(*) FILTER (WHERE submitted_at >= NOW() - INTERVAL '7 days')::int AS last_7d_reports,
+          MAX(submitted_at) AS last_submission_at
+        FROM delivery_reports
+      `
+    );
+    const row = result.rows[0];
+    return {
+      total_reports: Number(row?.total_reports ?? 0),
+      unique_postcodes: Number(row?.unique_postcodes ?? 0),
+      unique_sectors: Number(row?.unique_sectors ?? 0),
+      last_24h_reports: Number(row?.last_24h_reports ?? 0),
+      last_7d_reports: Number(row?.last_7d_reports ?? 0),
+      last_submission_at: row?.last_submission_at ?? null
+    };
+  }
+
+  const db = ensureSqlite();
+  const statement = db.prepare(
+    `
+      SELECT
+        COUNT(*) AS total_reports,
+        COUNT(DISTINCT postcode) AS unique_postcodes,
+        COUNT(DISTINCT outward_sector) AS unique_sectors,
+        SUM(CASE WHEN submitted_at >= datetime('now', '-1 day') THEN 1 ELSE 0 END) AS last_24h_reports,
+        SUM(CASE WHEN submitted_at >= datetime('now', '-7 day') THEN 1 ELSE 0 END) AS last_7d_reports,
+        MAX(submitted_at) AS last_submission_at
+      FROM delivery_reports
+    `
+  );
+  const row = statement.get() as Record<string, number | string | null> | undefined;
+  return {
+    total_reports: Number(row?.total_reports ?? 0),
+    unique_postcodes: Number(row?.unique_postcodes ?? 0),
+    unique_sectors: Number(row?.unique_sectors ?? 0),
+    last_24h_reports: Number(row?.last_24h_reports ?? 0),
+    last_7d_reports: Number(row?.last_7d_reports ?? 0),
+    last_submission_at: (row?.last_submission_at as string | null) ?? null
+  };
+}
+
+export async function fetchDeliveryTypeCounts(): Promise<DeliveryTypeCountRow[]> {
+  if (isPostgres) {
+    const pool = await ensurePostgres();
+    const result = await pool.query<DeliveryTypeCountRow>(
+      `SELECT delivery_type, COUNT(*)::int AS count FROM delivery_reports GROUP BY delivery_type`
+    );
+    return result.rows.map((row) => ({
+      delivery_type: row.delivery_type,
+      count: Number(row.count)
+    }));
+  }
+
+  const db = ensureSqlite();
+  const statement = db.prepare(
+    `SELECT delivery_type, COUNT(*) AS count FROM delivery_reports GROUP BY delivery_type`
+  );
+  return statement.all() as DeliveryTypeCountRow[];
+}
+
+export async function fetchDailyReportCounts(sinceDate: string): Promise<DailyReportsRow[]> {
+  if (isPostgres) {
+    const pool = await ensurePostgres();
+    const result = await pool.query<DailyReportsRow>(
+      `
+        SELECT delivery_date::text AS date, COUNT(*)::int AS count
+        FROM delivery_reports
+        WHERE delivery_date >= $1
+        GROUP BY delivery_date
+        ORDER BY delivery_date ASC
+      `,
+      [sinceDate]
+    );
+    return result.rows.map((row) => ({
+      date: row.date,
+      count: Number(row.count)
+    }));
+  }
+
+  const db = ensureSqlite();
+  const statement = db.prepare(
+    `
+      SELECT delivery_date AS date, COUNT(*) AS count
+      FROM delivery_reports
+      WHERE delivery_date >= ?
+      GROUP BY delivery_date
+      ORDER BY delivery_date ASC
+    `
+  );
+  return statement.all(sinceDate) as DailyReportsRow[];
+}
+
+export async function fetchMinutesSince(sinceDate: string): Promise<number[]> {
+  if (isPostgres) {
+    const pool = await ensurePostgres();
+    const result = await pool.query<{ minutes_since_midnight: number }>(
+      `
+        SELECT minutes_since_midnight
+        FROM delivery_reports
+        WHERE delivery_date >= $1
+        ORDER BY minutes_since_midnight ASC
+      `,
+      [sinceDate]
+    );
+    return result.rows.map((row) => Number(row.minutes_since_midnight));
+  }
+
+  const db = ensureSqlite();
+  const statement = db.prepare(
+    `
+      SELECT minutes_since_midnight
+      FROM delivery_reports
+      WHERE delivery_date >= ?
+      ORDER BY minutes_since_midnight ASC
+    `
+  );
+  const rows = statement.all(sinceDate) as Array<{ minutes_since_midnight: number }>;
+  return rows.map((row) => Number(row.minutes_since_midnight));
 }

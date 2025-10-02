@@ -26,3 +26,28 @@ export interface PostcodePayload {
   fullPostcode: AggregatedStats | null;
   lastUpdated: string | null;
 }
+
+export interface DailyReportPoint {
+  date: string;
+  count: number;
+}
+
+export interface DeliveryTypeBreakdownEntry {
+  type: DeliveryType;
+  count: number;
+}
+
+export interface GlobalStats {
+  totals: {
+    totalReports: number;
+    uniquePostcodes: number;
+    uniqueSectors: number;
+    last24hReports: number;
+    last7dReports: number;
+  };
+  lastSubmissionAt: string | null;
+  medianMinutesLast30Days: number | null;
+  dailyReports: DailyReportPoint[];
+  deliveryTypeBreakdown: DeliveryTypeBreakdownEntry[];
+  rollingWindowStart: string;
+}

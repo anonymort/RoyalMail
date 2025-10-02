@@ -9,6 +9,7 @@ const today = new Date().toISOString().slice(0, 10);
 let tempDir: string;
 let submitReport: (typeof import('@/lib/queries'))['submitReport'];
 let getPostcodeSummary: (typeof import('@/lib/queries'))['getPostcodeSummary'];
+let getGlobalStats: (typeof import('@/lib/queries'))['getGlobalStats'];
 let fetchReports: (typeof import('@/lib/db'))['fetchReports'];
 
 beforeEach(async () => {
@@ -17,7 +18,7 @@ beforeEach(async () => {
   process.env.DATABASE_URL = '';
   process.env.SQLITE_PATH = sqlitePath;
   vi.resetModules();
-  ({ submitReport, getPostcodeSummary } = await import('@/lib/queries'));
+  ({ submitReport, getPostcodeSummary, getGlobalStats } = await import('@/lib/queries'));
   ({ fetchReports } = await import('@/lib/db'));
 });
 
@@ -139,5 +140,73 @@ describe('getPostcodeSummary', () => {
     });
 
     expect(await getPostcodeSummary('ZZ9Z 9ZZ')).toBeNull();
+  });
+});
+
+describe('getGlobalStats', () => {
+  it('returns zeroed stats when no data exists', async () => {
+    const stats = await getGlobalStats();
+
+    expect(stats.totals.totalReports).toBe(0);
+    expect(stats.totals.last7dReports).toBe(0);
+    expect(stats.lastSubmissionAt).toBeNull();
+    expect(stats.medianMinutesLast30Days).toBeNull();
+    expect(stats.dailyReports).toHaveLength(14);
+    expect(stats.dailyReports.every((point) => point.count === 0)).toBe(true);
+    expect(stats.deliveryTypeBreakdown).toEqual([
+      { type: 'letters', count: 0 },
+      { type: 'parcels', count: 0 },
+      { type: 'both', count: 0 }
+    ]);
+  });
+
+  it('aggregates counts, coverage, and delivery type mix', async () => {
+    const todayIso = new Date().toISOString().slice(0, 10);
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayIso = yesterday.toISOString().slice(0, 10);
+    const eightDaysAgo = new Date();
+    eightDaysAgo.setDate(eightDaysAgo.getDate() - 8);
+    const eightDaysAgoIso = eightDaysAgo.toISOString().slice(0, 10);
+
+    const submissions: Array<{ postcode: string; deliveryDate: string; deliveryTime: string; deliveryType: string }> = [
+      { postcode: 'M46 0TF', deliveryDate: todayIso, deliveryTime: '09:00', deliveryType: 'letters' },
+      { postcode: 'M46 0TG', deliveryDate: yesterdayIso, deliveryTime: '11:15', deliveryType: 'parcels' },
+      { postcode: 'SW1A 1AA', deliveryDate: eightDaysAgoIso, deliveryTime: '08:45', deliveryType: 'both' }
+    ];
+
+    for (const submission of submissions) {
+      await submitReport(submission);
+    }
+
+    const stats = await getGlobalStats();
+
+    expect(stats.totals.totalReports).toBe(submissions.length);
+    expect(stats.totals.uniquePostcodes).toBe(3);
+    expect(stats.totals.uniqueSectors).toBe(2);
+    expect(stats.totals.last7dReports).toBeGreaterThanOrEqual(2);
+    expect(stats.totals.last24hReports).toBeGreaterThanOrEqual(1);
+    expect(stats.lastSubmissionAt).not.toBeNull();
+    expect(stats.medianMinutesLast30Days).toBe(9 * 60);
+
+    const todayPoint = stats.dailyReports.find((point) => point.date === todayIso);
+    const yesterdayPoint = stats.dailyReports.find((point) => point.date === yesterdayIso);
+    const eightDaysAgoPoint = stats.dailyReports.find((point) => point.date === eightDaysAgoIso);
+
+    expect(todayPoint?.count).toBe(1);
+    expect(yesterdayPoint?.count).toBe(1);
+    expect(eightDaysAgoPoint?.count).toBe(1);
+
+    const breakdownMap = new Map(stats.deliveryTypeBreakdown.map((entry) => [entry.type, entry.count]));
+    expect(breakdownMap.get('letters')).toBe(1);
+    expect(breakdownMap.get('parcels')).toBe(1);
+    expect(breakdownMap.get('both')).toBe(1);
+
+    const rollingWindowExpected = (() => {
+      const window = new Date();
+      window.setDate(window.getDate() - 30);
+      return window.toISOString().slice(0, 10);
+    })();
+    expect(stats.rollingWindowStart).toBe(rollingWindowExpected);
   });
 });

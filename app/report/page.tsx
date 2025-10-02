@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Suspense } from 'react';
+import { ContributionSnapshot } from '@/components/ContributionSnapshot';
 import { ReportForm } from '@/components/ReportForm';
 
 export default function ReportPage() {
@@ -12,9 +13,12 @@ export default function ReportPage() {
           details.
         </p>
       </div>
-      <Suspense fallback={<p className="text-sm text-cat-overlay1">Loading form…</p>}>
-        <ReportForm />
-      </Suspense>
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
+        <Suspense fallback={<p className="text-sm text-cat-overlay1">Loading form…</p>}>
+          <ReportForm />
+        </Suspense>
+        <ContributionSnapshot />
+      </div>
       <p className="text-xs text-cat-overlay1">
         Looking for stats?
         <Link href="/" className="ml-1 text-cat-sky">

@@ -1,12 +1,17 @@
 # Royal Mail Delivery Times Tracker
 
-Minimal Next.js 15 app that crowdsources Royal Mail delivery times per postcode sector. Designed for Railway deployment with managed Postgres (SQLite remains available for local development).
+Minimal Next.js 15 app that crowdsources Royal Mail delivery times per postcode sector. Designed for Railway deployment with managed Postgres (SQLite remains available for local development) and surfaces live community metrics on the homepage to build trust with visitors.
 
 ## Stack
 - Next.js 15 (App Router + TypeScript)
 - TailwindCSS with Catppuccin palette
 - SQLite via `better-sqlite3` by default; `pg` fallback when `DATABASE_URL` is Postgres
-- Recharts histogram for delivery time distribution
+- Recharts charts powering delivery histograms, daily submission sparkline, and delivery-type mix
+
+## Key features
+- Postcode search with sector + full postcode aggregation once seven submissions are reached
+- Homepage “Community data pulse” summarising total reports, coverage, latest submission, and median arrival time plus daily trend & delivery-type visuals
+- Report form with a “Why your report matters” snapshot reinforcing community contribution impact
 
 ## Getting started
 1. Install dependencies:
@@ -56,8 +61,10 @@ Minimal Next.js 15 app that crowdsources Royal Mail delivery times per postcode 
 - `npm run start` – launch production server
 - `npm run lint` – basic lint checks via `eslint-config-next`
 - `npm run typecheck` – strict TypeScript check (`tsc --noEmit`)
+- `npm run test:unit` – Vitest unit + integration suites (uses a temp SQLite DB)
+- `npm run test:e2e` – Playwright happy-path coverage with auto-started dev server
 
 ## Notes
-- Delivery stats aggregate the last 30 days of reports.
+- Delivery stats aggregate the last 30 days of reports; homepage copy references this rolling window.
 - Full postcode breakdown unlocks after 7 submissions; otherwise only the sector view is shown.
-- Histogram buckets are 15 minutes to keep the UI legible.
+- Histogram buckets are 15 minutes to keep the UI legible, and the homepage sparkline spans the last 14 days.
