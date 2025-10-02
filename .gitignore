@@ -12,3 +12,13 @@ dist
 coverage
 test-results
 tsconfig.tsbuildinfo
+
+# Codex CLI configuration files
+codex-config.toml
+.codex/
+setup-codex-railway.sh
+CODEX_RAILWAY_MCP.md
+
+# IDE MCP configurations
+.vscode/mcp.json
+.cursor/mcp.json
