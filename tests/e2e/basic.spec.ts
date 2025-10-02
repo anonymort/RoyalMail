@@ -11,11 +11,25 @@ test.describe('Royal Mail delivery app', () => {
     await expect(reportLinks).toHaveCount(2);
   });
 
+  test('postcode search normalises input and navigates', async ({ page }) => {
+    await page.goto('/');
+
+    const input = page.getByPlaceholder('Enter postcode (e.g. M46 0TF)');
+    await input.fill('m460tf');
+    await expect(input).toHaveValue('M46 0TF');
+
+    await page.getByRole('button', { name: 'Check delivery times' }).click();
+    await page.waitForURL('**/postcode/M46%200TF', { timeout: 15_000 });
+    await expect(page.getByRole('heading', { name: 'No data for M46 0TF' })).toBeVisible();
+  });
+
   test('report form accepts input', async ({ page }) => {
     await page.goto('/report');
 
     await expect(page.getByLabel('Postcode')).toBeVisible();
-    await page.getByLabel('Postcode').fill('M46 0TF');
+    const postcodeField = page.getByLabel('Postcode');
+    await postcodeField.fill('m460tf');
+    await expect(postcodeField).toHaveValue('M46 0TF');
 
     await expect(page.getByLabel('Delivery date')).toBeVisible();
     await expect(page.getByLabel('Delivery time')).toBeVisible();

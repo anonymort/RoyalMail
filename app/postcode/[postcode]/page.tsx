@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { DeliveryHistogram } from '@/components/DeliveryHistogram';
 import { getPostcodeSummary } from '@/lib/queries';
+import { formatPostcodeForDisplay, parsePostcode } from '@/lib/postcodes';
 import { AggregatedStats } from '@/lib/types';
 
 interface PostcodePageProps {
@@ -62,16 +63,18 @@ function StatsPanel({ stats }: { stats: AggregatedStats }) {
 
 export default async function PostcodePage({ params }: PostcodePageProps) {
   const postcode = decodeURIComponent(params.postcode);
+  const parsed = parsePostcode(postcode);
+  const displayPostcode = parsed?.normalised ?? formatPostcodeForDisplay(postcode);
   const summary = await getPostcodeSummary(postcode);
 
   if (!summary) {
     return (
       <div className="space-y-6">
-        <h1 className="text-3xl font-semibold text-cat-rosewater">No data for {postcode}</h1>
+        <h1 className="text-3xl font-semibold text-cat-rosewater">No data for {displayPostcode || postcode}</h1>
         <p className="text-cat-overlay1">
           Nobody has reported a delivery for this postcode yet. You can be the first.
         </p>
-        <Link href={`/report?postcode=${encodeURIComponent(postcode)}`} className="w-fit">
+        <Link href={`/report?postcode=${encodeURIComponent(displayPostcode || postcode)}`} className="w-fit">
           Report a delivery
         </Link>
       </div>

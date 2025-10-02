@@ -2,14 +2,7 @@
 
 import { FormEvent, useState } from 'react';
 import { useRouter } from 'next/navigation';
-
-function normalisePostcode(value: string) {
-  return value
-    .trim()
-    .toUpperCase()
-    .replace(/\s+/g, '')
-    .replace(/(.{3,4})(.*)/, (_, outward, inward) => `${outward} ${inward}`.trim());
-}
+import { normalisePostcodeInput, parsePostcode } from '@/lib/postcodes';
 
 export function PostcodeSearch() {
   const router = useRouter();
@@ -17,9 +10,12 @@ export function PostcodeSearch() {
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const normalised = normalisePostcode(postcode);
-    if (!normalised) return;
-    router.push(`/postcode/${encodeURIComponent(normalised)}`);
+    const parsed = parsePostcode(postcode);
+    if (!parsed) {
+      setPostcode(normalisePostcodeInput(postcode));
+      return;
+    }
+    router.push(`/postcode/${encodeURIComponent(parsed.normalised)}`);
   };
 
   return (
@@ -30,7 +26,7 @@ export function PostcodeSearch() {
         autoCapitalize="characters"
         placeholder="Enter postcode (e.g. M46 0TF)"
         value={postcode}
-        onChange={(event) => setPostcode(event.target.value)}
+        onChange={(event) => setPostcode(normalisePostcodeInput(event.target.value))}
         className="flex-1"
         required
       />

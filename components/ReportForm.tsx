@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { normalisePostcodeInput } from '@/lib/postcodes';
 
 interface ReportFormState {
   postcode: string;
@@ -24,7 +25,7 @@ export function ReportForm() {
   const params = useSearchParams();
   const [formState, setFormState] = useState<ReportFormState>({
     ...initialState,
-    postcode: params.get('postcode') ?? ''
+    postcode: normalisePostcodeInput(params.get('postcode') ?? '')
   });
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
   const [error, setError] = useState<string | null>(null);
@@ -75,7 +76,9 @@ export function ReportForm() {
           <input
             type="text"
             value={formState.postcode}
-            onChange={(event) => updateField('postcode', event.target.value)}
+            onChange={(event) => updateField('postcode', normalisePostcodeInput(event.target.value))}
+            inputMode="text"
+            autoCapitalize="characters"
             required
             placeholder="M46 0TF"
           />
