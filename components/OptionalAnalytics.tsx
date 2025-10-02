@@ -2,10 +2,13 @@
 
 import Script from 'next/script';
 
-const analyticsId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+const fallbackAnalyticsId = 'G-LZTLB12GK5';
+const analyticsId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || fallbackAnalyticsId;
+
+const shouldRender = Boolean(analyticsId);
 
 export function OptionalAnalytics() {
-  if (!analyticsId) return null;
+  if (!shouldRender) return null;
 
   return (
     <>
