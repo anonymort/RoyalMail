@@ -70,3 +70,4 @@ Minimal Next.js 15 app that crowdsources Royal Mail delivery times per postcode 
 - Full postcode breakdown unlocks after 7 submissions; otherwise only the sector view is shown.
 - Histogram buckets are 15 minutes to keep the UI legible, and the homepage sparkline spans the last 14 days.
 - Cached global metrics revalidate immediately after successful submissions outside of test runs.
+- During builds without database connectivity the global snapshot gracefully falls back to placeholder zeros so static generation can complete.

@@ -9,7 +9,7 @@
 - `tests/e2e/` – Playwright end-to-end specs. Add new tests close to related features.
 
 ### Caching & Revalidation
-- Global stats (`getGlobalStats`) are cached via `unstable_cache` with the `global-stats` tag; `submitReport` calls `revalidateTag('global-stats')` after successful inserts. When running outside Next.js (e.g., Vitest) the helpers gracefully fall back to uncached execution.
+- Global stats (`getGlobalStats`) are cached via `unstable_cache` with the `global-stats` tag; `submitReport` calls `revalidateTag('global-stats')` after successful inserts. When running outside Next.js (e.g., Vitest) the helpers gracefully fall back to uncached execution, and if the database is unavailable a placeholder zero snapshot is returned so prerenders do not fail.
 
 ## Build, Test, and Development Commands
 ```bash

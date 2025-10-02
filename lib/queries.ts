@@ -162,39 +162,63 @@ function buildContinuousDailySeries(
   return output;
 }
 
-const computeGlobalStats = async (): Promise<GlobalStats> => {
-  const [counts, deliveryTypeRows] = await Promise.all([fetchGlobalCounts(), fetchDeliveryTypeCounts()]);
-
+function buildEmptyGlobalStats(): GlobalStats {
   const rollingWindowStart = daysAgoIso(30);
-  const [dailyRows, minutesLast30Days] = await Promise.all([
-    fetchDailyReportCounts(daysAgoIso(13)),
-    fetchMinutesSince(rollingWindowStart)
-  ]);
-
-  const deliveryTypeOrder: DeliveryType[] = ['letters', 'parcels', 'both'];
-  const deliveryTypeMap = new Map(deliveryTypeRows.map((row) => [row.delivery_type, Number(row.count)]));
-  const deliveryTypeBreakdown = deliveryTypeOrder.map((type) => ({
-    type,
-    count: deliveryTypeMap.get(type) ?? 0
-  }));
-
-  const dailySeriesStart = daysAgoIso(13);
-  const dailyReports = buildContinuousDailySeries(dailySeriesStart, 14, dailyRows);
-
+  const dailyReports = buildContinuousDailySeries(daysAgoIso(13), 14, []);
   return {
     totals: {
-      totalReports: counts.total_reports,
-      uniquePostcodes: counts.unique_postcodes,
-      uniqueSectors: counts.unique_sectors,
-      last24hReports: counts.last_24h_reports,
-      last7dReports: counts.last_7d_reports
+      totalReports: 0,
+      uniquePostcodes: 0,
+      uniqueSectors: 0,
+      last24hReports: 0,
+      last7dReports: 0
     },
-    lastSubmissionAt: counts.last_submission_at,
-    medianMinutesLast30Days: computeMedian(minutesLast30Days),
+    lastSubmissionAt: null,
+    medianMinutesLast30Days: null,
     dailyReports,
-    deliveryTypeBreakdown,
+    deliveryTypeBreakdown: DELIVERY_TYPES.map((type) => ({ type, count: 0 })),
     rollingWindowStart
   };
+}
+
+const computeGlobalStats = async (): Promise<GlobalStats> => {
+  try {
+    const [counts, deliveryTypeRows] = await Promise.all([fetchGlobalCounts(), fetchDeliveryTypeCounts()]);
+
+    const rollingWindowStart = daysAgoIso(30);
+    const [dailyRows, minutesLast30Days] = await Promise.all([
+      fetchDailyReportCounts(daysAgoIso(13)),
+      fetchMinutesSince(rollingWindowStart)
+    ]);
+
+    const deliveryTypeOrder: DeliveryType[] = ['letters', 'parcels', 'both'];
+    const deliveryTypeMap = new Map(deliveryTypeRows.map((row) => [row.delivery_type, Number(row.count)]));
+    const deliveryTypeBreakdown = deliveryTypeOrder.map((type) => ({
+      type,
+      count: deliveryTypeMap.get(type) ?? 0
+    }));
+
+    const dailySeriesStart = daysAgoIso(13);
+    const dailyReports = buildContinuousDailySeries(dailySeriesStart, 14, dailyRows);
+
+    return {
+      totals: {
+        totalReports: counts.total_reports,
+        uniquePostcodes: counts.unique_postcodes,
+        uniqueSectors: counts.unique_sectors,
+        last24hReports: counts.last_24h_reports,
+        last7dReports: counts.last_7d_reports
+      },
+      lastSubmissionAt: counts.last_submission_at,
+      medianMinutesLast30Days: computeMedian(minutesLast30Days),
+      dailyReports,
+      deliveryTypeBreakdown,
+      rollingWindowStart
+    };
+  } catch (error) {
+    console.warn('Falling back to empty global stats snapshot', error);
+    return buildEmptyGlobalStats();
+  }
 };
 
 const getGlobalStatsCached = unstable_cache(computeGlobalStats, [GLOBAL_STATS_TAG], {
