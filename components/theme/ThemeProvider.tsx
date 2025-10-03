@@ -6,6 +6,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode
 } from 'react';
@@ -36,7 +37,7 @@ const applyTheme = (theme: Theme) => {
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>('light');
   const [mounted, setMounted] = useState(false);
-  const [hasStoredPreference, setHasStoredPreference] = useState(false);
+  const userPreferenceRef = useRef<Theme | null>(null);
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -49,13 +50,16 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     const systemTheme: Theme = mediaQuery.matches ? 'dark' : 'light';
     const initialTheme: Theme = persisted ?? systemTheme;
 
+    if (persisted) {
+      userPreferenceRef.current = persisted;
+    }
+
     setThemeState(initialTheme);
-    setHasStoredPreference(persisted !== null);
     applyTheme(initialTheme);
     setMounted(true);
 
     const handleMediaChange = (event: MediaQueryListEvent) => {
-      if (window.localStorage.getItem(STORAGE_KEY)) {
+      if (userPreferenceRef.current) {
         return;
       }
 
@@ -76,20 +80,30 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
     applyTheme(theme);
 
-    if (hasStoredPreference) {
-      window.localStorage.setItem(STORAGE_KEY, theme);
+    if (typeof window === 'undefined') {
+      return;
     }
-  }, [theme, mounted, hasStoredPreference]);
+
+    if (userPreferenceRef.current) {
+      window.localStorage.setItem(STORAGE_KEY, userPreferenceRef.current);
+    } else {
+      window.localStorage.removeItem(STORAGE_KEY);
+    }
+  }, [theme, mounted]);
 
   const setTheme = useCallback((nextTheme: Theme) => {
-    setHasStoredPreference(true);
+    userPreferenceRef.current = nextTheme;
     setThemeState(nextTheme);
+    applyTheme(nextTheme);
+
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(STORAGE_KEY, nextTheme);
+    }
   }, []);
 
   const toggleTheme = useCallback(() => {
-    setHasStoredPreference(true);
-    setThemeState((current) => (current === 'dark' ? 'light' : 'dark'));
-  }, []);
+    setTheme(theme === 'dark' ? 'light' : 'dark');
+  }, [setTheme, theme]);
 
   const value = useMemo<ThemeContextValue>(
     () => ({ theme, toggleTheme, setTheme, mounted }),

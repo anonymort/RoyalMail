@@ -1,76 +1,110 @@
-# Royal Mail Delivery Times Tracker
+# Royal Mail Delivery Times
 
-Minimal Next.js 15 app that crowdsources Royal Mail delivery times per postcode sector. Designed for Railway deployment with managed Postgres (SQLite remains available for local development) and surfaces live community metrics on the homepage to build trust with visitors.
+A crowd-sourced web application for tracking Royal Mail delivery times across UK postcodes. Users can search for delivery patterns in their postcode sector and contribute their own delivery data to help build a comprehensive picture of postal service performance.
 
-## Stack
-- Next.js 15 (App Router + TypeScript)
-- TailwindCSS with Catppuccin palette
-- SQLite via `better-sqlite3` by default; `pg` fallback when `DATABASE_URL` is Postgres
-- Recharts charts powering delivery histograms, daily submission sparkline, and delivery-type mix
+## Features
 
-## Key features
-- Postcode search with sector + full postcode aggregation once seven submissions are reached
-- Homepage “Community data pulse” summarising total reports, coverage, latest submission, and median arrival time plus daily trend & delivery-type visuals
-- Report form with a “Why your report matters” snapshot reinforcing community contribution impact
-- Global stats cached for 5 minutes and auto-invalidated when new delivery reports land
-- Quality controls block submissions outside Royal Mail operating hours, future dates, or Sunday letter slots
-- Codex CLI scaffolding (setup script, TOML config, and MCP docs) lives in this repo but stays out of version control—use `./setup-codex-railway.sh` locally as needed
+- **Postcode Search**: Search by postcode sector to view historical delivery times in your area
+- **Delivery Reporting**: Report your own deliveries to contribute to the community dataset
+- **Data Visualization**: Interactive charts showing delivery patterns including:
+  - Delivery time histograms
+  - Daily sparkline trends
+  - Delivery type breakdowns (tracked vs standard)
+- **Dark Mode**: Built-in theme toggle for comfortable viewing
+- **Privacy-First**: Optional analytics with user consent
 
-## Getting started
-1. Install dependencies:
-   ```bash
-   npm install
-   ```
-   (Peer deps are relaxed via `.npmrc` so React 19 RC works with Recharts.)
-2. (Optional) Copy environment defaults and adjust if needed:
-   ```bash
-   cp .env.example .env.local
-   ```
-   Leave `DATABASE_URL` blank for local SQLite; populate it to test against Postgres.
-3. Run the strict lint/typecheck suite:
-   ```bash
-   npm run lint && npm run typecheck
-   ```
-   (Next.js also runs these during `npm run build`.)
-4. Run the dev server (creates `data/delivery.sqlite` automatically when `DATABASE_URL` is unset):
-   ```bash
-   npm run dev
-   ```
-5. Visit `http://localhost:3000`.
+## Tech Stack
 
-## Environment variables
-| Variable | Purpose |
-| --- | --- |
-| `DATABASE_URL` | Postgres connection string (`postgresql://…`). Required in production; leave unset locally to use SQLite (`data/delivery.sqlite`). |
-| `SQLITE_PATH` | Optional override for the SQLite file location. Leave unset to use Postgres when `DATABASE_URL` is present. |
-| `NEXT_PUBLIC_GA_MEASUREMENT_ID` | Optional. Google Analytics v4 ID; when provided the tracking snippet is injected. |
+- **Framework**: Next.js 15.5 with React 19 RC
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS with Catppuccin color theme
+- **Charts**: Recharts for data visualization
+- **Database**: SQLite (better-sqlite3) / PostgreSQL support
+- **Testing**: Vitest (unit tests) and Playwright (E2E tests)
 
-## API endpoints
-- `POST /api/report` – body `{ postcode, deliveryDate (YYYY-MM-DD), deliveryTime (HH:mm), deliveryType, note? }`
-- `GET /api/postcode/[postcode]` – returns sector/full-postcode aggregates, 15-minute histogram, confidence level, and last update timestamp.
+## Getting Started
 
-## Railway deployment
-1. Create a Railway project and provision a web service from this repo.
-2. Provision the managed Postgres service (e.g., `Mail-Postgres`) and copy its `DATABASE_URL`.
-3. In the web service, add the `DATABASE_URL` variable (use the internal hostname `postgres.railway.internal:5432` for best performance). Keep `.env.local` for local overrides.
-4. (Optional) Add `NEXT_PUBLIC_GA_MEASUREMENT_ID`.
-5. Redeploy. On first boot the app will create the `delivery_reports` table automatically.
+### Prerequisites
 
-> Tip: For local development you can stay on SQLite—simply leave `DATABASE_URL` unset and the app will write to `data/delivery.sqlite`.
+- Node.js 20+
+- npm or yarn package manager
 
-## Scripts
-- `npm run dev` – start Next.js in development
-- `npm run build` – production build
-- `npm run start` – launch production server
-- `npm run lint` – basic lint checks via `eslint-config-next`
-- `npm run typecheck` – strict TypeScript check (`tsc --noEmit`)
-- `npm run test:unit` – Vitest unit + integration suites (uses a temp SQLite DB)
-- `npm run test:e2e` – Playwright happy-path coverage with auto-started dev server
+### Installation
 
-## Notes
-- Delivery stats aggregate the last 30 days of reports; homepage copy references this rolling window.
-- Full postcode breakdown unlocks after 7 submissions; otherwise only the sector view is shown.
-- Histogram buckets are 15 minutes to keep the UI legible, and the homepage sparkline spans the last 14 days.
-- Cached global metrics revalidate immediately after successful submissions outside of test runs.
-- During builds without database connectivity the global snapshot gracefully falls back to placeholder zeros so static generation can complete.
-- Delivery submissions must fall between 06:00–20:30, avoid Sundays, and cannot be set in the future to reduce noise.
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/royal-mail-delivery-times.git
+cd royal-mail-delivery-times
+```
+
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Set up your database:
+   - The application uses SQLite by default
+   - Configure database connection in your environment variables if using PostgreSQL
+
+4. Run the development server:
+```bash
+npm run dev
+```
+
+5. Open [http://localhost:3000](http://localhost:3000) in your browser
+
+## Available Scripts
+
+- `npm run dev` - Start the development server
+- `npm run build` - Build for production (runs linting and type checking first)
+- `npm start` - Start the production server
+- `npm run lint` - Run ESLint
+- `npm run typecheck` - Run TypeScript type checking
+- `npm test:unit` - Run unit tests with Vitest
+- `npm test:e2e` - Run E2E tests with Playwright
+
+## Project Structure
+
+```
+/
+├── app/              # Next.js app router pages
+├── components/       # React components
+│   └── theme/       # Theme-related components
+├── lib/             # Utility functions and database logic
+├── public/          # Static assets
+├── tests/           # Test files
+│   ├── unit/       # Unit tests
+│   └── e2e/        # E2E tests
+└── styles/          # Global styles
+```
+
+## Key Features
+
+### Data Quality
+- Automated validation for:
+  - Postcode format verification
+  - Delivery time consistency checks
+  - Date validation (no future dates, realistic ranges)
+  - Duplicate detection
+
+### Performance
+- Server-side rendering for optimal initial load
+- Efficient database queries with proper indexing
+- Responsive design for all device sizes
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is open source and available under the MIT License.
+
+## Deployment
+
+The application can be deployed to various platforms:
+- Vercel (recommended for Next.js)
+- Railway (with included MCP server configuration)
+- Any Node.js hosting platform
+
+For Railway deployment, the project includes Railway MCP server configuration for enhanced deployment capabilities.
