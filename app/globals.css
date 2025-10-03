@@ -3,73 +3,11 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: light;
-  --cat-rosewater: 255 235 234;
-  --cat-flamingo: 255 221 218;
-  --cat-pink: 249 206 214;
-  --cat-mauve: 206 148 168;
-  --cat-red: 196 0 47;
-  --cat-maroon: 153 0 36;
-  --cat-peach: 255 171 0;
-  --cat-yellow: 255 197 0;
-  --cat-green: 0 166 153;
-  --cat-teal: 0 156 166;
-  --cat-sky: 0 102 204;
-  --cat-sapphire: 0 82 164;
-  --cat-blue: 0 68 153;
-  --cat-lavender: 137 146 196;
-  --cat-text: 33 37 41;
-  --cat-subtext1: 73 80 87;
-  --cat-subtext0: 108 117 125;
-  --cat-overlay2: 140 150 160;
-  --cat-overlay1: 167 175 185;
-  --cat-overlay0: 196 202 210;
-  --cat-surface2: 216 220 228;
-  --cat-surface1: 232 235 241;
-  --cat-surface0: 242 244 248;
-  --cat-base: 248 249 252;
-  --cat-mantle: 242 243 247;
-  --cat-crust: 231 233 240;
-  --background: 248 249 252;
-  --foreground: 33 37 41;
-  --accent: 196 0 47;
-}
-
-html[data-theme='dark'] {
   color-scheme: dark;
-  --cat-rosewater: 255 199 204;
-  --cat-flamingo: 255 180 189;
-  --cat-pink: 255 166 205;
-  --cat-mauve: 224 162 255;
-  --cat-red: 255 94 124;
-  --cat-maroon: 224 70 102;
-  --cat-peach: 255 174 92;
-  --cat-yellow: 255 208 102;
-  --cat-green: 71 209 173;
-  --cat-teal: 67 200 214;
-  --cat-sky: 120 196 255;
-  --cat-sapphire: 96 172 240;
-  --cat-blue: 87 148 255;
-  --cat-lavender: 172 178 255;
-  --cat-text: 224 230 247;
-  --cat-subtext1: 176 188 214;
-  --cat-subtext0: 152 164 189;
-  --cat-overlay2: 127 139 166;
-  --cat-overlay1: 104 115 140;
-  --cat-overlay0: 82 92 115;
-  --cat-surface2: 47 54 73;
-  --cat-surface1: 36 42 58;
-  --cat-surface0: 27 32 44;
-  --cat-base: 16 18 26;
-  --cat-mantle: 11 13 20;
-  --cat-crust: 7 8 13;
-  --background: 16 18 26;
-  --foreground: 224 230 247;
-  --accent: 255 94 124;
 }
 
 body {
-  @apply bg-background text-foreground min-h-screen antialiased transition-colors duration-300;
+  @apply bg-background text-foreground min-h-screen antialiased;
 }
 
 a {
