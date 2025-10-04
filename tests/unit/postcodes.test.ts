@@ -9,12 +9,12 @@ import {
 describe('postcodes helpers', () => {
   it('parses standard postcode formats', () => {
     const result = parsePostcode('m46 0tf');
-    expect(result).toEqual({ normalised: 'M46 0TF', outwardSector: 'M46 0' });
+    expect(result).toEqual({ normalised: 'M46 0TF', outwardSector: 'M46 0', outward: 'M46' });
   });
 
   it('handles the GIR 0AA special case', () => {
     const result = parsePostcode('gir0aa');
-    expect(result).toEqual({ normalised: 'GIR 0AA', outwardSector: 'GIR 0' });
+    expect(result).toEqual({ normalised: 'GIR 0AA', outwardSector: 'GIR 0', outward: 'GIR' });
   });
 
   it('returns null for invalid postcodes', () => {

@@ -17,7 +17,14 @@ test.describe('Royal Mail delivery app', () => {
     const privacyLink = page.getByRole('link', { name: 'Privacy Policy' });
     await expect(privacyLink).toBeVisible();
 
-    await expect(page.locator('script[src*="googletagmanager.com/gtag/js"]').first()).toBeAttached();
+    const analyticsScript = page.locator('script[src*="googletagmanager.com/gtag/js"]');
+    await expect(analyticsScript).toHaveCount(0);
+
+    const allowAnalytics = page.getByRole('button', { name: /Allow analytics/i });
+    if ((await allowAnalytics.count()) > 0) {
+      await allowAnalytics.click();
+      await expect(analyticsScript).toHaveCount(1);
+    }
   });
 
   test('postcode search normalises input and navigates', async ({ page }) => {

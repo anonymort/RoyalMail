@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { DeliveryHistogram } from '@/components/DeliveryHistogram';
-import { getPostcodeSummary } from '@/lib/queries';
+import { getNearbySectorSummaries, getPostcodeSummary } from '@/lib/queries';
 import { formatPostcodeForDisplay, parsePostcode } from '@/lib/postcodes';
 import { AggregatedStats } from '@/lib/types';
 
@@ -66,7 +66,13 @@ export default async function PostcodePage({ params }: PostcodePageProps) {
   const postcode = decodeURIComponent(rawPostcode);
   const parsed = parsePostcode(postcode);
   const displayPostcode = parsed?.normalised ?? formatPostcodeForDisplay(postcode);
+  const outwardAreaLabel = parsed?.outward ?? 'this area';
   const summary = await getPostcodeSummary(postcode);
+  let nearbySectors: AggregatedStats[] = [];
+
+  if (!summary && parsed) {
+    nearbySectors = await getNearbySectorSummaries(parsed.outward);
+  }
 
   if (!summary) {
     return (
@@ -78,6 +84,26 @@ export default async function PostcodePage({ params }: PostcodePageProps) {
         <Link href={`/report?postcode=${encodeURIComponent(displayPostcode || postcode)}`} className="w-fit">
           Report a delivery
         </Link>
+        {nearbySectors.length > 0 ? (
+          <div className="space-y-4 rounded-xl border border-cat-surface2 bg-cat-surface0 p-4">
+            <div className="space-y-1">
+              <h2 className="text-xl font-semibold text-cat-rosewater">Active nearby sectors</h2>
+              <p className="text-sm text-cat-overlay1">
+                We do not have direct reports for {displayPostcode}, but these neighbouring sectors in {outwardAreaLabel}
+                have recent submissions.
+              </p>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              {nearbySectors.map((stats) => (
+                <StatsPanel key={stats.label} stats={stats} />
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="rounded-xl border border-cat-surface2 bg-cat-surface0 p-4 text-sm text-cat-overlay0">
+            No nearby reports yet. Share your delivery to kickstart insights for this area.
+          </div>
+        )}
       </div>
     );
   }

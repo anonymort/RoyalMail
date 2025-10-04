@@ -10,6 +10,7 @@ let tempDir: string;
 let submitReport: (typeof import('@/lib/queries'))['submitReport'];
 let getPostcodeSummary: (typeof import('@/lib/queries'))['getPostcodeSummary'];
 let getGlobalStats: (typeof import('@/lib/queries'))['getGlobalStats'];
+let getNearbySectorSummaries: (typeof import('@/lib/queries'))['getNearbySectorSummaries'];
 let fetchReports: (typeof import('@/lib/db'))['fetchReports'];
 let ValidationError: typeof import('@/lib/queries')['ValidationError'];
 
@@ -19,7 +20,7 @@ beforeEach(async () => {
   process.env.DATABASE_URL = '';
   process.env.SQLITE_PATH = sqlitePath;
   vi.resetModules();
-  ({ submitReport, getPostcodeSummary, getGlobalStats, ValidationError } = await import('@/lib/queries'));
+  ({ submitReport, getPostcodeSummary, getGlobalStats, getNearbySectorSummaries, ValidationError } = await import('@/lib/queries'));
   ({ fetchReports } = await import('@/lib/db'));
 });
 
@@ -270,5 +271,34 @@ describe('getGlobalStats', () => {
       return window.toISOString().slice(0, 10);
     })();
     expect(stats.rollingWindowStart).toBe(rollingWindowExpected);
+  });
+});
+
+describe('getNearbySectorSummaries', () => {
+  it('returns active sector stats within the outward area', async () => {
+    const todayIso = new Date().toISOString().slice(0, 10);
+
+    const makeSubmission = async (postcode: string, deliveryTime: string) => {
+      await submitReport({
+        postcode,
+        deliveryDate: todayIso,
+        deliveryTime,
+        deliveryType: 'letters'
+      });
+    };
+
+    await Promise.all([
+      makeSubmission('QA3A 1AB', '08:00'),
+      makeSubmission('QA3A 1AB', '08:30'),
+      makeSubmission('QA3A 1AB', '09:15'),
+      makeSubmission('QA3A 2AB', '07:15'),
+      makeSubmission('QA3A 2AB', '07:45'),
+      makeSubmission('ZZ9Z 9ZZ', '10:00')
+    ]);
+
+    const summaries = await getNearbySectorSummaries('QA3A');
+    expect(summaries.length).toBeGreaterThanOrEqual(2);
+    expect(summaries[0]).toMatchObject({ label: 'QA3A 1', count: 3 });
+    expect(summaries[1]).toMatchObject({ label: 'QA3A 2', count: 2 });
   });
 });

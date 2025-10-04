@@ -1,4 +1,5 @@
 import {
+  fetchActiveSectors,
   fetchDailyReportCounts,
   fetchDeliveryTypeCounts,
   fetchGlobalCounts,
@@ -207,6 +208,26 @@ export async function getPostcodeSummary(postcode: string): Promise<(PostcodePay
   };
 
   return summary;
+}
+
+export async function getNearbySectorSummaries(outwardArea: string, limit = 3): Promise<AggregatedStats[]> {
+  const sinceDate = daysAgoIso(30);
+  const topSectors = await fetchActiveSectors({ outwardArea, sinceDate, limit });
+  if (!topSectors.length) {
+    return [];
+  }
+
+  const sectorSummaries: AggregatedStats[] = [];
+  for (const sector of topSectors) {
+    const rows = await fetchReports({ outwardSector: sector.outward_sector, sinceDate });
+    if (!rows.length) {
+      continue;
+    }
+    const minutes = rows.map((row) => row.minutes_since_midnight);
+    sectorSummaries.push(renderStats(sector.outward_sector, minutes));
+  }
+
+  return sectorSummaries;
 }
 
 function buildContinuousDailySeries(

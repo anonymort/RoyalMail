@@ -23,6 +23,11 @@ export interface DailyReportsRow {
   count: number;
 }
 
+export interface ActiveSectorRow {
+  outward_sector: string;
+  report_count: number;
+}
+
 type SqliteInstance = BetterSqlite3.Database;
 
 const DATABASE_URL = process.env.DATABASE_URL;
@@ -261,6 +266,52 @@ export async function fetchDeliveryTypeCounts(): Promise<DeliveryTypeCountRow[]>
     `SELECT delivery_type, COUNT(*) AS count FROM delivery_reports GROUP BY delivery_type`
   );
   return statement.all() as DeliveryTypeCountRow[];
+}
+
+interface ActiveSectorParams {
+  outwardArea: string;
+  sinceDate: string;
+  limit: number;
+}
+
+export async function fetchActiveSectors(params: ActiveSectorParams): Promise<ActiveSectorRow[]> {
+  const pattern = `${params.outwardArea} %`;
+
+  if (isPostgres) {
+    const pool = await ensurePostgres();
+    const result = await pool.query<ActiveSectorRow>(
+      `
+        SELECT outward_sector, COUNT(*)::int AS report_count
+        FROM delivery_reports
+        WHERE outward_sector LIKE $1 AND delivery_date >= $2
+        GROUP BY outward_sector
+        ORDER BY report_count DESC
+        LIMIT $3
+      `,
+      [pattern, params.sinceDate, params.limit]
+    );
+    return result.rows.map((row) => ({
+      outward_sector: row.outward_sector,
+      report_count: Number(row.report_count)
+    }));
+  }
+
+  const db = ensureSqlite();
+  const statement = db.prepare(
+    `
+      SELECT outward_sector, COUNT(*) AS report_count
+      FROM delivery_reports
+      WHERE outward_sector LIKE ? AND delivery_date >= ?
+      GROUP BY outward_sector
+      ORDER BY report_count DESC
+      LIMIT ?
+    `
+  );
+  const rows = statement.all(pattern, params.sinceDate, params.limit) as ActiveSectorRow[];
+  return rows.map((row) => ({
+    outward_sector: row.outward_sector,
+    report_count: Number(row.report_count)
+  }));
 }
 
 export async function fetchDailyReportCounts(sinceDate: string): Promise<DailyReportsRow[]> {

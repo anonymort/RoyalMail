@@ -25,6 +25,7 @@ function applyCanonicalSpacing(cleaned: string): string {
 export interface PostcodeParts {
   normalised: string;
   outwardSector: string;
+  outward: string;
 }
 
 export function parsePostcode(input: string): PostcodeParts | null {
@@ -44,7 +45,7 @@ export function parsePostcode(input: string): PostcodeParts | null {
 
   const normalised = `${parts.outward} ${parts.inward}`;
   const outwardSector = `${parts.outward} ${parts.inward.charAt(0)}`;
-  return { normalised, outwardSector };
+  return { normalised, outwardSector, outward: parts.outward };
 }
 
 export function normalisePostcodeInput(value: string): string {
